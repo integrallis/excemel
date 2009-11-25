@@ -1,0 +1,12 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+LICENSE
+lib/blankslate.rb
+lib/excemel.rb
+lib/excemel/blankslate.rb
+lib/excemel/excemel.rb
+lib/module/lang.rb
+lib/module/xom.rb
+lib/java/xom-1.1.jar
