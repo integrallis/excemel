@@ -9,71 +9,70 @@
 # above copyright notice is included.
 #++
 
-require 'rake/clean'
-require 'rake/testtask'
-require 'rake/rdoctask'
+# encoding: utf-8
+
+# --------------------------------------------------------------------
+
+require 'rubygems'
+require 'bundler'
 begin
-  require 'rubygems'
-  require 'rake/gempackagetask'
-rescue Exception
-  nil
+  Bundler.setup(:default, :development)
+rescue Bundler::BundlerError => e
+  $stderr.puts e.message
+  $stderr.puts "Run `bundle install` to install missing gems"
+  exit e.status_code
+end
+require 'rake'
+
+# --------------------------------------------------------------------
+
+require 'jeweler'
+Jeweler::Tasks.new do |gem|
+  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
+  gem.name = "excemel"
+  gem.homepage = "http://github.com/bsbodden/excemel"
+  gem.license = "MIT"
+  gem.summary = "JRuby DSL for XOM"
+  gem.description = "JRuby DSL for XML Building and Manipulation with XPath & XQuery"
+  gem.email = "bsbodden@integrallis.com"
+  gem.authors = ["Brian Sam-Bodden"]
+  gem.platform = "java"
+  gem.files = FileList["History.txt", "Manifest.txt", "README.rdoc", "Gemfile", "Rakefile", "LICENSE", "lib/**/*.rb", "lib/java/*.jar"]
+  # dependencies defined in Gemfile
+end
+Jeweler::RubygemsDotOrgTasks.new
+
+# --------------------------------------------------------------------
+
+require 'rake/testtask'
+Rake::TestTask.new(:test) do |test|
+  test.libs << 'lib' << 'test'
+  test.pattern = 'test/**/test_*.rb'
+  test.verbose = true
 end
 
 # --------------------------------------------------------------------
 
-desc "Default Task"
-task :default => :test_all
-
-# Test Tasks ---------------------------------------------------------
-
-desc "Run all tests"
-task :test_all => [:test_units]
-task :ta => [:test_all]
-
-task :tu => [:test_units]
-
-Rake::TestTask.new("test_units") do |t|
-  t.test_files = FileList['test/test*.rb']
-  t.verbose = false
+require 'rcov/rcovtask'
+Rcov::RcovTask.new do |test|
+  test.libs << 'test'
+  test.pattern = 'test/**/test_*.rb'
+  test.verbose = true
+  test.rcov_opts << '--exclude "gems/*"'
 end
 
-# Create RDOC documentation ------------------------------------------
+task :default => :test
 
-rd = Rake::RDocTask.new("rdoc") { |rdoc|
-  rdoc.rdoc_dir = 'html/rdoc'
-  rdoc.title    = "Excemel"
-  rdoc.options << '--line-numbers' << '--inline-source' << '--main' << 'README'
-  rdoc.rdoc_files.include('lib/**/*.rb', '[A-Z]*', 'doc/**/*.rdoc')
-  rdoc.template = 'jamis'
-}
+# --------------------------------------------------------------------
 
-task :filelist do
-  puts FileList['pkg/**/*'].inspect
+require 'rdoc/task'
+RDoc::Task.new do |rdoc|
+  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title = "excemel #{version}"
+  rdoc.rdoc_files.include('README*')
+  rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
-# Hoe down ------------------------------------------------------------
-begin
-  MANIFEST = FileList["History.txt", "Manifest.txt", "README.txt", 
-    "Rakefile", "LICENSE", "lib/**/*.rb", "lib/java/xom-1.1.jar"]
-
-  file "Manifest.txt" => :manifest
-  task :manifest do
-    File.open("Manifest.txt", "w") {|f| MANIFEST.each {|n| f << "#{n}\n"} }
-  end
-  Rake::Task['manifest'].invoke # Always regen manifest, so Hoe has up-to-date list of files
-
-  require 'hoe'
-  Hoe.new("excemel", "0.0.1") do |p|
-    p.rubyforge_name = "excemel"
-    p.url = "http://excemel.rubyforge.org"
-    p.author = "Brian Sam-Bodden"
-    p.email = "bsbodden@integrallis.com"
-    p.summary = "JRuby DSL for XOM"
-    p.platform = 'jruby'
-    p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
-    p.description = p.paragraphs_of('README.txt', 0...1).join("\n\n")
-    p.extra_deps.reject!{|d| d.first == "hoe"}
-  end
-rescue LoadError
-  puts "You really need Hoe installed to be able to package this gem"
-end
+# --------------------------------------------------------------------

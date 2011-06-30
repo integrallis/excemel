@@ -170,6 +170,9 @@ class TestDocument < Test::Unit::TestCase
     assert_equal "<?xml version=\"1.0\"?>\n<root><div><span><a href=\"ref\">text</a></span></div></root>\n", @xml.to_xml
   end
   
+  def test_xinclude
+  end
+  
   
 end
 

@@ -24,10 +24,11 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
  
+require 'rubygems' 
+require 'blankslate' 
 require 'java'
 require 'module/lang'
 require 'module/xom'
-require 'excemel/blankslate'
 
 module Excemel
   
@@ -41,6 +42,8 @@ module Excemel
     # :file => filename : A filename pointing to an XML file
     # :validate => true|false : whether to validate the document being read from
     #              an XML string, URL or file
+    # :resolve_includes => true|false replaces xi:include elements by the content they refer to
+    # :namespace => provides a namespace prefix to the elements
     def initialize(options)
       # extract options
       validate = options[:validate] ? options[:validate] : false
@@ -49,6 +52,7 @@ module Excemel
       url = options[:url]
       file = options[:file]
       namespace = options[:namespace]
+      resolve_includes = options[:resolve_includes] ? options[:resolve_includes] : false
       
       if root
         unless namespace
@@ -56,10 +60,7 @@ module Excemel
         else
           @root = XOM::Element.new "#{root}", namespace
           prefix = root.to_s.split(":").first if root.include? ":"
-          if prefix
-            @namespaces = Hash.new
-            @namespaces[prefix] = namespace
-          end
+          (@namespaces ||= {})[prefix] = namespace if prefix
         end
         
         @doc = XOM::Document.new @root
@@ -76,6 +77,10 @@ module Excemel
         @doc = builder.build java_file       
       end
       
+      if resolve_includes
+        @doc = XOM::XIncluder.resolve(@doc)
+      end
+      
       @root = @doc.get_root_element unless @root
       @target = @root
     end
@@ -84,7 +89,7 @@ module Excemel
     # Add XML elements (tags) based on the name of the method called on the 
     # Document instance, blocks passed get processed recursively
     def method_missing(sym, *args, &block)
-      if sym.to_s != 'class' && sym.to_s != 'to_s' # WTF? If I don't do this I
+      if sym.to_s != 'class' && sym.to_s != 'to_s' && sym.to_s != 'inspect' # WTF? If I don't do this I
         text = nil                                 # end up with extraneous tags        
         attrs = nil                                # in the resulting document!!
         namespace = nil
@@ -140,18 +145,21 @@ module Excemel
     def comment!(string)
       comment = XOM::Comment.new string
       @target.append_child(comment)
+      self
     end
     
     # Appends a text node at the current position in the document
     def text!(string)
       text = XOM::Text.new string
       @target.append_child(text)
+      self
     end
     
     # Appends a processing instruction at the current position in the document
     def processing_instruction!(target, data)
       pi = XOM::ProcessingInstruction.new(target, data)
       @target.append_child(pi)
+      self
     end
     
     # Attempts to reposition the document pointer based on the first match of 
@@ -176,6 +184,7 @@ module Excemel
     # associated namespace
     def tag!(sym, *args, &block)
       method_missing(sym.to_sym, *args, &block)
+      self
     end
     
     # Returns a pretty-formatted document with the given indent, max line length
@@ -195,6 +204,7 @@ module Excemel
     def doc_type!(root_element_name, public_id='', system_id='')
       doctype = XOM::DocType(root_element_name, public_id, system_id)
       @doc.insert_child(doctype, 0)
+      self
     end
     
     # Returns the value of the first child element with the specified name in 
@@ -236,20 +246,6 @@ module Excemel
       outputter = XOM::Canonicalizer.new baos
       outputter.write(@doc)
       baos.to_string
-    end
-    
-    # :all => library.shelf, :where => book.author = "Brian Sam-Bodden"
-    # big question, turn this into and xpath or xquery? temptative answer => "yes"
-    def find(options)
-      # extract options
-      all = options[:all]
-      where = options[:where]
-      # the :all tells us how to reduce the search space
-      puts "all => #{all.to_s}, where => #{where.to_s}"
-      #self.query("//person[@first='Brian']/address/@city").each do |city|
-      #  puts "City: #{city}"
-      #end
-      # the :where tell us how to filter elements in the partial document
     end
     
     private
