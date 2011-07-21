@@ -190,11 +190,11 @@ module Excemel
     # Returns a pretty-formatted document with the given indent, max line length
     # and encoding. The preserve_base_uri determines whether preserves the 
     # original base URIs by inserting extra xml:base attributes.
-    def to_pretty_xml(indent=2, line_lenght=0, encoding='utf-8', preserve_base_uri=true)
+    def to_pretty_xml(indent=2, line_length=0, encoding='utf-8', preserve_base_uri=true)
       baos = Lang::ByteArrayOutputStream.new      
       serializer = XOM::Serializer.new(baos, encoding)
       serializer.indent = indent 
-      serializer.max_length = line_lenght
+      serializer.max_length = line_length
       serializer.write @doc 
       baos.to_string
     end
@@ -246,6 +246,12 @@ module Excemel
       outputter = XOM::Canonicalizer.new baos
       outputter.write(@doc)
       baos.to_string
+    end
+    
+    # Adds attributes to the current target element (pointer to an element in the document 
+    # by default the root of the document)
+    def attributes(attrs)
+      _add_attributes(@target, attrs)
     end
     
     private

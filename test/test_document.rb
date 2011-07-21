@@ -65,26 +65,13 @@ class TestDocument < Test::Unit::TestCase
     assert_equal %[<?xml version=\"1.0\"?>\n<root><ref id=\"H&amp;R\" /></root>\n], @xml.to_xml
   end
 
-#  def test_symbol_attributes_are_unquoted_by_default
-#    @xml.ref(:id => :"H&amp;R")
-#    assert_equal %{<ref id="H&amp;R"/>}, @xml.to_xml
-#  end
-#
-#  def test_attributes_quoted_can_be_turned_on
-#    @xml = Builder::XmlMarkup.new
-#    @xml.ref(:id => "<H&R \"block\">")
-#    assert_equal %{<ref id="&lt;H&amp;R &quot;block&quot;&gt;"/>}, @xml.target!
-#  end
-#
-#  def test_mixed_attribute_quoting_with_nested_builders
-#    x = Builder::XmlMarkup.new(:target=>@xml)
-#    @xml.ref(:id=>:"H&amp;R") {
-#      x.element(:tag=>"Long&Short")
-#    }
-#    assert_equal "<ref id=\"H&amp;R\"><element tag=\"Long&amp;Short\"/></ref>",
-#      @xml.target!
-#  end
-#
+  def test_mixed_attribute_quoting_with_nested_builders
+    @xml.ref(:id=>:"H&amp;R") { |x|
+     x.element(:tag=>"Long&Short")
+    }
+    assert_equal "<?xml version=\"1.0\"?>\n<root><ref id=\"H&amp;amp;R\"><element tag=\"Long&amp;Short\" /></ref></root>\n", @xml.to_xml
+  end
+
   def test_multiple_attributes
     @xml.ref(:id => 12, :name => "bill")
     assert_equal %[<?xml version=\"1.0\"?>\n<root><ref id=\"12\" name=\"bill\" /></root>\n], @xml.to_xml
@@ -128,23 +115,11 @@ class TestDocument < Test::Unit::TestCase
     assert_equal "<?xml version=\"1.0\"?>\n<root><title><a><b>bob</b></a></title></root>\n", @xml.to_xml
   end
   
-  def name
-    "bob"
-  end
-
   def test_append_text
     @xml.p { |x| x.br; x.text! "HI" }
     assert_equal "<?xml version=\"1.0\"?>\n<root><p><br />HI</p></root>\n", @xml.to_xml    
   end
-#  
-#  def test_ambiguous_markup
-#    ex = assert_raises(ArgumentError) {
-#      @xml.h1("data1") { b }
-#    }
-#    assert_match /\btext\b/, ex.message
-#    assert_match /\bblock\b/, ex.message
-#  end
-#
+
   def test_capitalized_method
     @xml.P { |x| x.B("hi"); x.BR(); x.EM { x.text! "world" } }
     assert_equal "<?xml version=\"1.0\"?>\n<root><P><B>hi</B><BR /><EM>world</EM></P></root>\n", @xml.to_xml
@@ -155,24 +130,29 @@ class TestDocument < Test::Unit::TestCase
     assert_equal %{<?xml version=\"1.0\"?>\n<root><div>&lt;hi&gt;<em>H&amp;R Block</em></div></root>\n}, @xml.to_xml
   end
 
-#  def test_non_escaping
-#    @xml.div("ns:xml"=>:"&xml;") { |x| x << "<h&i>"; x.em("H&R Block") }
-#    assert_equal %{<div ns:xml="&xml;"><h&i><em>H&amp;R Block</em></div>}, @xml.to_xml
-#  end
-#
-#  def test_return_value
-#    str = @xml.x("men")
-#    assert_equal @xml.target!, str
-#  end
-#
-  def test_stacked_builders#    
+  def test_return_value
+    value = @xml.x("men")
+    assert_equal @xml.to_xml, value.to_xml
+  end
+
+  def test_stacked_builders
     @xml.div { @xml.span { @xml.a("text", :href=>"ref") } }
     assert_equal "<?xml version=\"1.0\"?>\n<root><div><span><a href=\"ref\">text</a></span></div></root>\n", @xml.to_xml
   end
   
-  def test_xinclude
+  def test_navigate_and_add_attributes
+    xml = %[<doc><tag1><message>No</message></tag1><tag2><message>More</message></tag2></doc>]
+
+    doc = Excemel::Document.new :xml => xml
+    doc.attributes("message_body" => "you are here") if doc.target! "doc/tag1/message"
+    assert_equal "<?xml version=\"1.0\"?>\n<doc><tag1><message message_body=\"you are here\">No</message></tag1><tag2><message>More</message></tag2></doc>\n", doc.to_xml
   end
   
+  private 
+  
+  def name
+    "bob"
+  end
   
 end
 

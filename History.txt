@@ -1,3 +1,12 @@
 == 0.0.1
 
 - initial release
+
+== 1.0.0
+
+- clean and fixes for jruby 1.6.1
+
+== 1.0.1
+
+- added the ability to add attributes to the current document target (pointer 
+  to an element in the document)
