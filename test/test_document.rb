@@ -148,6 +148,13 @@ class TestDocument < Test::Unit::TestCase
     assert_equal "<?xml version=\"1.0\"?>\n<doc><tag1><message message_body=\"you are here\">No</message></tag1><tag2><message>More</message></tag2></doc>\n", doc.to_xml
   end
   
+  def test_remove_attributes
+    @xml.div { @xml.span { @xml.a("text", :href=>"ref") } }
+
+    @xml.attributes("href" => nil) if @xml.target! "//a"
+    assert_equal "<?xml version=\"1.0\"?>\n<root><div><span><a>text</a></span></div></root>\n", @xml.to_xml
+  end
+  
   private 
   
   def name

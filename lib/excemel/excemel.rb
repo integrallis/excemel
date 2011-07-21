@@ -257,12 +257,18 @@ module Excemel
     private
     
     # Adds attributes to the given Element (tag) as define by the parameter 
-    # target
+    # target, passing an attribute with a value of nil, removes the attribute if
+    # it exists
     def _add_attributes(target, attrs)
       if attrs    
         attrs.each do |key, value|
-          attribute = XOM::Attribute.new(key.to_s, value.to_s)
-          target.add_attribute(attribute)
+          unless value.nil?
+            attribute = XOM::Attribute.new(key.to_s, value.to_s)
+            target.add_attribute(attribute)
+          else
+            attribute = target.get_attribute(key.to_s)
+            target.remove_attribute(attribute) if attribute
+          end
         end
       end
     end  

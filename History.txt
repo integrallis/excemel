@@ -10,3 +10,7 @@
 
 - added the ability to add attributes to the current document target (pointer 
   to an element in the document)
+
+== 1.0.2
+
+- added the ability to remove attributes by passing nil as a value
