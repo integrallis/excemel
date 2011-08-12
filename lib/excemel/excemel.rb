@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
- 
 #--
 # Copyright &169;2001-2008 Integrallis Software, LLC. 
 # All Rights Reserved.
@@ -23,7 +21,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
- 
+
 require 'rubygems' 
 require 'blankslate' 
 require 'java'

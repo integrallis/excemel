@@ -1,5 +1,4 @@
-#!/usr/bin/env ruby
- 
+$LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
 #--
 # Copyright &169;2001-2008 Integrallis Software, LLC. 
 # All Rights Reserved.
@@ -24,7 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
   
-require 'excemel/excemel'
+require 'excemel'
 
 raw_text = '<email><to>Anne</to><from>Brian</from><heading>Reminder</heading><body>XML is here to stay</body></email>'
 xml_doc = Excemel::Document.new :xml => raw_text

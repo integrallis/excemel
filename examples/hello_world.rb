@@ -1,5 +1,4 @@
-#!/usr/bin/env ruby
- 
+$LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
 #--
 # Copyright &169;2001-2008 Integrallis Software, LLC. 
 # All Rights Reserved.
@@ -23,8 +22,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
-  
-require 'excemel/excemel'
+require 'excemel'
 
 doc = Excemel::Document.new :root => "root"
 doc.text! "Hello World!"
