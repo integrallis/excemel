@@ -1,4 +1,4 @@
-== Project: Excemel
+# Project: Excemel
 
 [![Code Climate](https://codeclimate.com/github/integrallis/excemel.png)](https://codeclimate.com/github/integrallis/excemel)
 
