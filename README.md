@@ -1,5 +1,8 @@
 # Excemel: Better XML for JRuby
 
+[![Build Status](https://secure.travis-ci.org/integrallis/excemel.png?branch=master)](http://travis-ci.org/integrallis/excemel) 
+[![Gem Version](https://badge.fury.io/rb/excemel.png)](http://badge.fury.io/rb/excemel)
+[![Dependency Status](https://gemnasium.com/integrallis/excemel.png)](https://gemnasium.com/integrallis/excemel) 
 [![Code Climate](https://codeclimate.com/github/integrallis/excemel.png)](https://codeclimate.com/github/integrallis/excemel)
 
 Excemel is a Ruby DSL for Elliotte Rusty Harold's XOM XML library. It is based 
