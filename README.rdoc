@@ -1,5 +1,7 @@
 == Project: Excemel
 
+[![Code Climate](https://codeclimate.com/github/integrallis/excemel.png)](https://codeclimate.com/github/integrallis/excemel)
+
 Excemel is a Ruby DSL for Elliotte Rusty Harold's XOM XML library. It is based 
 on Jim Weirich's Builder. Excemel brings to JRuby the expressiveness and 
 close-to-the-language XML construction features of Builder with the correctness, 
