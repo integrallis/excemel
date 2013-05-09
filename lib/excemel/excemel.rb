@@ -45,9 +45,6 @@ module Excemel
     def initialize(options)
       # extract options
       root = _extract_options(options, :root)
-      xml = _extract_options(options, :xml)
-      url = _extract_options(options, :url)
-      file = _extract_options(options, :file)
       namespace = _extract_options(options, :namespace)
       resolve_includes = _extract_options(options, :resolve_includes, true)
       validate = _extract_options(options, :validate, true)
@@ -60,21 +57,11 @@ module Excemel
         end
         @doc = XOM::Document.new @root
       else
-        builder = XOM::Builder.new validate
+        @doc = _generate_doc_from_source(options, XOM::Builder.new(validate))
+        @root = @doc.get_root_element
       end
-      
-      if xml
-        @doc = builder.build(xml, nil)
-      elsif url
-        @doc = builder.build url
-      elsif file
-        java_file = Lang::File.new file        
-        @doc = builder.build java_file       
-      end
-      
-      @doc = XOM::XIncluder.resolve(@doc) if resolve_includes
-      
-      @root = @doc.get_root_element unless @root
+            
+      @doc = XOM::XIncluder.resolve(@doc) if resolve_includes  
       @target = @root
     end
     
@@ -292,6 +279,24 @@ module Excemel
     
     def _extract_options(options, sym, boolean = false)
       boolean ? (options[sym] ? options[sym] : false) : options[sym]
+    end
+    
+    def _generate_doc_from_source(options, builder)
+      doc = nil
+      xml = _extract_options(options, :xml)
+      url = _extract_options(options, :url)
+      file = _extract_options(options, :file)
+      
+      if xml
+        doc = builder.build(xml, nil)
+      elsif url
+        doc = builder.build url
+      elsif file
+        java_file = Lang::File.new file        
+        doc = builder.build java_file       
+      end
+      
+      doc
     end
     
   end 
