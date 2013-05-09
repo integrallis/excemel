@@ -4,7 +4,6 @@ gem 'blankslate', '~> 3.1.2'
 
 group :development do
   gem "bundler"
-  gem "jeweler", "~> 1.6.2"
   gem "simplecov"
   gem "rdoc", ">= 3.7"
 end

@@ -26,24 +26,6 @@ require 'rake'
 
 # --------------------------------------------------------------------
 
-require 'jeweler'
-Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "excemel"
-  gem.homepage = "http://github.com/bsbodden/excemel"
-  gem.license = "MIT"
-  gem.summary = "JRuby DSL for XOM"
-  gem.description = "JRuby DSL for XML Building and Manipulation with XPath & XQuery"
-  gem.email = "bsbodden@integrallis.com"
-  gem.authors = ["Brian Sam-Bodden"]
-  gem.platform = "java"
-  gem.files = FileList["History.txt", "Manifest.txt", "README.rdoc", "Gemfile", "Rakefile", "LICENSE", "lib/**/*.rb", "lib/java/*.jar"]
-  # dependencies defined in Gemfile
-end
-Jeweler::RubygemsDotOrgTasks.new
-
-# --------------------------------------------------------------------
-
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
