@@ -1,4 +1,4 @@
-# Project: Excemel
+# Excemel: Better XML for JRuby
 
 [![Code Climate](https://codeclimate.com/github/integrallis/excemel.png)](https://codeclimate.com/github/integrallis/excemel)
 
@@ -11,11 +11,11 @@ Excemel extends the semantics of Builder with methods to navigate the
 in memory XML document with XPath and exposing some of the powerful XML
 manipulation capabilities of XOM.
 
-== Usage
+## Usage
 
 See usage examples under /examples directory of this distribution
 
-== Contact
+## Contact
 
 Author::     Brian Sam-Bodden
 Email::      bsbodden@integrallis.com
