@@ -17,9 +17,9 @@ See usage examples under /examples directory of this distribution
 
 ## Contact
 
-Author::     Brian Sam-Bodden
-Email::      bsbodden@integrallis.com
-Home Page::  http://integrallis.com
-License::    MIT Licence (http://www.opensource.org/licenses/mit-license.html)
+* Author::     Brian Sam-Bodden
+* Email::      bsbodden@integrallis.com
+* Home Page::  http://integrallis.com
+* License::    MIT Licence (http://www.opensource.org/licenses/mit-license.html)
 
 
