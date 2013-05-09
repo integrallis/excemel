@@ -43,23 +43,9 @@ module Excemel
     # :resolve_includes => true|false replaces xi:include elements by the content they refer to
     # :namespace => provides a namespace prefix to the elements
     def initialize(options)
-      # extract options
-      root = _extract_options(options, :root)
-      namespace = _extract_options(options, :namespace)
       resolve_includes = _extract_options(options, :resolve_includes, true)
-      validate = _extract_options(options, :validate, true)
       
-      if root
-        @root = _build_tag(root, namespace) 
-        if namespace
-          prefix = root.to_s.split(":").first if root.include? ":"
-          (@namespaces ||= {})[prefix] = namespace if prefix
-        end
-        @doc = XOM::Document.new @root
-      else
-        @doc = _generate_doc_from_source(options, XOM::Builder.new(validate))
-        @root = @doc.get_root_element
-      end
+      _build_document(options)
             
       @doc = XOM::XIncluder.resolve(@doc) if resolve_includes  
       @target = @root
@@ -297,6 +283,28 @@ module Excemel
       end
       
       doc
+    end
+    
+    def _build_document(options)
+      root = _extract_options(options, :root)
+      namespace = _extract_options(options, :namespace)
+      validate = _extract_options(options, :validate, true)
+      
+      if root
+        _build_document_from_root(root, namespace)
+      else
+        @doc = _generate_doc_from_source(options, XOM::Builder.new(validate))
+        @root = @doc.get_root_element
+      end
+    end
+    
+    def _build_document_from_root(root, namespace)
+      @root = _build_tag(root, namespace) 
+      if namespace
+        prefix = root.to_s.split(":").first if root.include? ":"
+        (@namespaces ||= {})[prefix] = namespace if prefix
+      end
+      @doc = XOM::Document.new @root
     end
     
   end 
