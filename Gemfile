@@ -7,3 +7,7 @@ group :development do
   gem "simplecov"
   gem "rdoc", ">= 3.7"
 end
+
+group :test do
+  gem 'rake'
+end
