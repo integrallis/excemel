@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
  
 #--
-# Copyright &169;2001-2008 Integrallis Software, LLC. 
+# Copyright &169;2001-2013 Integrallis Software, LLC. 
 # All Rights Reserved.
 # 
 # Permission is granted for use, copying, modification, distribution,
@@ -53,12 +53,10 @@ end
 
 # --------------------------------------------------------------------
 
-require 'rcov/rcovtask'
-Rcov::RcovTask.new do |test|
-  test.libs << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-  test.rcov_opts << '--exclude "gems/*"'
+require 'simplecov'
+SimpleCov.command_name 'Unit Tests'
+SimpleCov.start do
+  add_group "source", "lib"
 end
 
 task :default => :test

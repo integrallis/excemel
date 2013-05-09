@@ -44,26 +44,23 @@ module Excemel
     # :namespace => provides a namespace prefix to the elements
     def initialize(options)
       # extract options
-      validate = options[:validate] ? options[:validate] : false
-      root = options[:root]
-      xml = options[:xml]
-      url = options[:url]
-      file = options[:file]
-      namespace = options[:namespace]
-      resolve_includes = options[:resolve_includes] ? options[:resolve_includes] : false
+      root = _extract_options(options, :root)
+      xml = _extract_options(options, :xml)
+      url = _extract_options(options, :url)
+      file = _extract_options(options, :file)
+      namespace = _extract_options(options, :namespace)
+      resolve_includes = _extract_options(options, :resolve_includes, true)
+      validate = _extract_options(options, :validate, true)
       
       if root
-        unless namespace
-          @root = XOM::Element.new "#{root}"
-        else
-          @root = XOM::Element.new "#{root}", namespace
+        @root = _build_tag(root, namespace) 
+        if namespace
           prefix = root.to_s.split(":").first if root.include? ":"
           (@namespaces ||= {})[prefix] = namespace if prefix
         end
-        
         @doc = XOM::Document.new @root
       else
-        builder = XOM::Builder.new validate 
+        builder = XOM::Builder.new validate
       end
       
       if xml
@@ -75,9 +72,7 @@ module Excemel
         @doc = builder.build java_file       
       end
       
-      if resolve_includes
-        @doc = XOM::XIncluder.resolve(@doc)
-      end
+      @doc = XOM::XIncluder.resolve(@doc) if resolve_includes
       
       @root = @doc.get_root_element unless @root
       @target = @root
@@ -87,39 +82,10 @@ module Excemel
     # Add XML elements (tags) based on the name of the method called on the 
     # Document instance, blocks passed get processed recursively
     def method_missing(sym, *args, &block)
-      if sym.to_s != 'class' && sym.to_s != 'to_s' && sym.to_s != 'inspect' # WTF? If I don't do this I
-        text = nil                                 # end up with extraneous tags        
-        attrs = nil                                # in the resulting document!!
-        namespace = nil
-        sym = "#{sym}:#{args.shift}" if args.first.kind_of?(Symbol)
-        prefix = sym.to_s.split(":").first if sym.to_s.include? ":"
-        args.each do |arg|
-          case arg
-          when Hash
-            if arg.has_key? :namespace
-              namespace = arg[:namespace]
-              prefix = sym.to_s.split(":").first
-            else
-              attrs ||= {}
-              attrs.merge!(arg)
-            end
-          else
-            text ||= ''
-            text << arg.to_s
-          end
-        end
-        
-        # try to get the namespace from the saved namespaces
-        if prefix != nil && namespace.nil? && @namespaces != nil
-          namespace = "#{@namespaces[prefix]}"
-        end
-        
-        unless namespace
-          tag = XOM::Element.new sym.to_s
-        else
-          tag = XOM::Element.new sym.to_s, namespace
-        end 
-        
+      unless %w(class to_s inspect).include?(sym.to_s)                                      
+        sym = _extract_sym(args, sym)      
+        attrs, namespace, prefix, text = _process_args(args, sym)
+        tag = _build_tag(sym, namespace)   
         _add_attributes(tag, attrs)
         
         if block
@@ -280,6 +246,53 @@ module Excemel
     ensure
       @target = old_target
     end    
+    
+    def _build_tag(sym, namespace = nil)
+      unless namespace
+        tag = XOM::Element.new sym.to_s
+      else
+        tag = XOM::Element.new sym.to_s, namespace
+      end
+      tag
+    end
+    
+    def _get_namespace(prefix)
+      @namespaces ? "#{@namespaces[prefix]}" : nil
+    end
+    
+    def _extract_sym(args, sym)
+      args.first.kind_of?(Symbol) ? "#{sym}:#{args.shift}" : sym
+    end
+    
+    def _extract_prefix(sym)
+      sym.to_s.include? ":" ? sym.to_s.split(":").first : nil 
+    end
+    
+    def _process_args(args, sym)
+      attrs, namespace, text = nil
+      prefix = _extract_prefix(sym)
+      args.each do |arg|
+        case arg
+        when Hash
+          if arg.has_key? :namespace
+            namespace = arg[:namespace]
+            prefix = sym.to_s.split(":").first
+          else
+            attrs ||= {}
+            attrs.merge!(arg)
+          end
+        else
+          text ||= ''
+          text << arg.to_s
+        end
+      end
+      namespace = _get_namespace(prefix) if prefix
+      [attrs, namespace, prefix, text]
+    end
+    
+    def _extract_options(options, sym, boolean = false)
+      boolean ? (options[sym] ? options[sym] : false) : options[sym]
+    end
     
   end 
   

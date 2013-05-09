@@ -25,7 +25,7 @@
 #++
  
 require 'java'
-require 'java/xom-1.2.7.jar'
+require 'java/xom-1.2.9.jar'
 
 module XOM
   include_package 'nu.xom'

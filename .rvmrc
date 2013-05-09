@@ -1,1 +1,1 @@
-rvm use jruby@excemel
+rvm use jruby@excemel --create

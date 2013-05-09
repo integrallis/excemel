@@ -1,10 +1,10 @@
 source "http://rubygems.org"
 
-gem 'blankslate', '~>2.1.2.4'
+gem 'blankslate', '~> 3.1.2'
 
 group :development do
-  gem "bundler", "~> 1.0.0"
+  gem "bundler"
   gem "jeweler", "~> 1.6.2"
-  gem "rcov", ">= 0"
+  gem "simplecov"
   gem "rdoc", ">= 3.7"
 end
