@@ -15,6 +15,8 @@
 
 require 'rubygems'
 require 'bundler'
+require 'coveralls'
+
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
@@ -37,7 +39,9 @@ end
 
 require 'simplecov'
 SimpleCov.command_name 'Unit Tests'
+SimpleCov.formatter = Coveralls::SimpleCov::Formatter
 SimpleCov.start do
+  add_filter 'app/secrets'
   add_group "source", "lib"
 end
 
