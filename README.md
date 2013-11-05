@@ -21,7 +21,7 @@ See usage examples under /examples directory of this distribution
 
 ## Contact
 
-* Author::     Brian Sam-Bodden
+* Author::     Brian Sam-Bodden and the Integrallis Crew
 * Email::      bsbodden@integrallis.com
 * Home Page::  http://integrallis.com
 * License::    MIT Licence (http://www.opensource.org/licenses/mit-license.html)
