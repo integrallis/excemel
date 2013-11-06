@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
   s.name = "excemel"
-  s.version = "1.1.0"
+  s.version = "1.1.1"
   s.platform = "java"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brian Sam-Bodden"]
-  s.date = "2013-05-09"
+  s.date = "2013-11-06"
   s.description = "JRuby DSL for XML Building and Manipulation with XPath"
   s.email = "bsbodden@integrallis.com"
   s.extra_rdoc_files = [
@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "lib/excemel.rb",
     "lib/excemel/excemel.rb",
-    "lib/java/xom-1.2.9.jar",
+    "lib/java/xom-1.2.10.jar",
     "lib/module/lang.rb",
     "lib/module/xom.rb"
   ]
