@@ -25,7 +25,12 @@ $LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib
   
 require 'excemel'
 
-xml = Excemel::Document.new :root => "soap"
-xml.tag!("Envelope") { xml.payload("yummy!") }
+xml = Excemel::Document.new :root => "Mailbox"
+xml.tag!("Envelope") { xml.payload("Letter!") }
+
+puts xml.to_pretty_xml
+
+xml = Excemel::Document.new :root => "Mailbox"
+xml.tag! "Envelope", "Letter"
 
 puts xml.to_pretty_xml

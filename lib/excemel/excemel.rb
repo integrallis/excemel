@@ -56,7 +56,7 @@ module Excemel
     # Document instance, blocks passed get processed recursively
     def method_missing(sym, *args, &block)
       unless %w(class to_s inspect).include?(sym.to_s)                                      
-        sym = _extract_sym(args, sym)      
+        sym = _extract_sym(args, sym)
         attrs, namespace, prefix, text = _process_args(args, sym)
         tag = _build_tag(sym, namespace)   
         _add_attributes(tag, attrs)
@@ -139,16 +139,9 @@ module Excemel
     # Appends an XML document type declaration at the current position in the 
     # document
     def doc_type!(root_element_name, public_id='', system_id='')
-      doctype = XOM::DocType(root_element_name, public_id, system_id)
+      doctype = XOM::DocType.new(root_element_name, public_id, system_id)
       @doc.insert_child(doctype, 0)
       self
-    end
-    
-    # Returns the value of the first child element with the specified name in 
-    # no namespace. If there is no such element, it returns nill.
-    def find_first_tag_by_name(tag_name)
-      element = @root.get_first_child_element tag_name
-      element ? element.get_value : nil
     end
     
     # Returns the values of the nodes selected by the XPath expression in the 
@@ -221,10 +214,10 @@ module Excemel
     end    
     
     def _build_tag(sym, namespace = nil)
-      unless namespace
-        tag = XOM::Element.new sym.to_s
-      else
+      if namespace && !namespace.empty?
         tag = XOM::Element.new sym.to_s, namespace
+      else
+        tag = XOM::Element.new sym.to_s
       end
       tag
     end
@@ -238,7 +231,7 @@ module Excemel
     end
     
     def _extract_prefix(sym)
-      sym.to_s.include? ":" ? sym.to_s.split(":").first : nil 
+      sym.to_s.include?(':') ? sym.to_s.split(":").first : nil 
     end
     
     def _process_args(args, sym)
@@ -250,6 +243,7 @@ module Excemel
           if arg.has_key? :namespace
             namespace = arg[:namespace]
             prefix = sym.to_s.split(":").first
+            (@namespaces ||= {})[prefix] = namespace if prefix
           else
             attrs ||= {}
             attrs.merge!(arg)
@@ -278,7 +272,7 @@ module Excemel
       elsif url
         doc = builder.build url
       elsif file
-        java_file = Lang::File.new file        
+        java_file = Java::JavaIo::File.new file        
         doc = builder.build java_file       
       end
       

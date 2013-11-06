@@ -37,14 +37,6 @@ end
 
 # --------------------------------------------------------------------
 
-require 'simplecov'
-SimpleCov.command_name 'Unit Tests'
-SimpleCov.formatter = Coveralls::SimpleCov::Formatter
-SimpleCov.start do
-  add_filter 'app/secrets'
-  add_group "source", "lib"
-end
-
 task :default => :test
 
 # --------------------------------------------------------------------

@@ -1,4 +1,5 @@
 $LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+
 #--
 # Copyright &169;2001-2008 Integrallis Software, LLC. 
 # All Rights Reserved.
@@ -27,6 +28,14 @@ require 'coveralls'
 Coveralls.wear!
 
 require 'test/unit'
+require 'simplecov'
+SimpleCov.command_name 'Unit Tests'
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
+SimpleCov.start
+
 require 'excemel'
 
 class TestDocument < Test::Unit::TestCase
@@ -147,11 +156,145 @@ class TestDocument < Test::Unit::TestCase
     assert_equal "<?xml version=\"1.0\"?>\n<doc><tag1><message message_body=\"you are here\">No</message></tag1><tag2><message>More</message></tag2></doc>\n", doc.to_xml
   end
   
+  def test_target_doesnt_exist
+    xml = %[<doc><tag1><message>No</message></tag1><tag2><message>More</message></tag2></doc>]
+  
+    doc = Excemel::Document.new :xml => xml
+    
+    assert_equal doc.target!("doc/tag3/message"), false
+  end
+  
   def test_remove_attributes
     @xml.div { @xml.span { @xml.a("text", :href=>"ref") } }
 
     @xml.attributes("href" => nil) if @xml.target! "//a"
     assert_equal "<?xml version=\"1.0\"?>\n<root><div><span><a>text</a></span></div></root>\n", @xml.to_xml
+  end
+  
+  def test_comments
+    @xml.head {                         
+      @xml.title "History"     
+    }                                                                 
+    @xml.body {                                
+      @xml.comment! " HI "                   
+      @xml.h1 "Header"                        
+      @xml.p "paragraph"                     
+    }                                    
+    assert_match /<!-- HI -->/, @xml.to_xml
+  end
+  
+  def test_processing_instruction_to_xml
+    @xml.processing_instruction!('test', 'test')
+    assert_match /<\?test test\?>/, @xml.to_xml
+  end
+  
+  def test_processing_instruction_fail_if_target_contains_colons
+    assert_raise Java::NuXom::IllegalTargetException do
+      @xml.processing_instruction!('test:test', 'test')
+    end
+  end
+  
+  def test_to_pretty_xml
+    @xml.head {                         
+      @xml.title "History"     
+    }                                                                 
+    @xml.body {                                
+      @xml.comment! " HI "                   
+      @xml.h1 "Header"                        
+      @xml.p "paragraph"                     
+    }                                    
+    assert_equal "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<root>\r\n  <head>\r\n    <title>History</title>\r\n  </head>\r\n  <body>\r\n    <!-- HI -->\r\n    <h1>Header</h1>\r\n    <p>paragraph</p>\r\n  </body>\r\n</root>\r\n", @xml.to_pretty_xml
+  end
+  
+  def test_doc_type_all_args
+    @xml.doc_type! "MyName", "-//Me//some public ID", "http://www.w3.org/TR/some.dtd"
+    assert_match /<!DOCTYPE MyName PUBLIC "-\/\/Me\/\/some public ID" "http:\/\/www.w3.org\/TR\/some.dtd">/, @xml.to_xml
+  end
+  
+  def test_doc_type_only_public_id
+    @xml.doc_type! "MyName", "-//Me//some public ID"
+    assert_match /<!DOCTYPE MyName PUBLIC \"-\/\/Me\/\/some public ID\" \"\">/, @xml.to_xml
+  end
+  
+  def test_doc_type_only_private_id
+    @xml.doc_type! "MyName", nil, "http://www.w3.org/TR/some.dtd"
+    assert_match /<!DOCTYPE MyName SYSTEM "http:\/\/www.w3.org\/TR\/some.dtd">/, @xml.to_xml
+  end
+  
+  def test_xpath_query
+    @xml.head {                         
+      @xml.title "History"     
+    }                                                                 
+    @xml.body {                                
+      @xml.comment! " HI "                   
+      @xml.h1 "Header"                        
+      @xml.p "paragraph"                     
+    }                                    
+    assert_equal "History", @xml.query("//title").first
+  end
+  
+  def test_extract_test
+    xml = %[<doc><word>I </word><word>am </word><word>the </word><word>decider</word></doc>]
+
+    doc = Excemel::Document.new :xml => xml
+
+    assert_equal 'I am the decider', doc.extract_text
+  end
+  
+  def test_to_canonical_form
+    xml = %[<?xml version="1.0" encoding="ISO-8859-1"?><foo>bar</foo>]
+    doc = Excemel::Document.new :xml => xml
+    assert_equal '<foo>bar</foo>', doc.to_canonical_form
+  end
+  
+  def test_namespaces
+    namespace = "http://www.w3.org/1998/Math/MathML"
+    doc = Excemel::Document.new :root => "mathml:math", :namespace => namespace
+    doc.tag! "mathml:mrow" do
+      doc.tag! "mathml:mi", "f(1)"
+      doc.tag! "mathml:mo", "="
+      doc.tag! "mathml:mn", 1
+    end
+    
+    expected = %[<mathml:math xmlns:mathml="http://www.w3.org/1998/Math/MathML"><mathml:mrow><mathml:mi>f(1)</mathml:mi><mathml:mo>=</mathml:mo><mathml:mn>1</mathml:mn></mathml:mrow></mathml:math>]
+
+    assert_match /#{Regexp.quote(expected)}/, doc.to_xml
+  end
+  
+  def test_nested_namespace
+    namespace = "http://www.w3.org/1998/Math/MathML"
+    doc = Excemel::Document.new :root => "d:student", :namespace => 'http://www.develop.com/student'
+    doc.tag! 'd:id', '3235329'
+    doc.tag! 's:name', {:namespace => 'urn:names-r-us'} do
+      doc.text! 'Jeff Smith'
+    end
+    doc.tag! 'd:language', 'C#'
+    doc.tag! 'd:rating', 35
+    
+    expected = %[<d:student xmlns:d="http://www.develop.com/student"><d:id>3235329</d:id><s:name xmlns:s="urn:names-r-us">Jeff Smith</s:name><d:language>C#</d:language><d:rating>35</d:rating></d:student>]
+
+    # <d:student xmlns:d="http://www.develop.com/student">
+    #   <d:id>3235329</d:id>
+    #   <s:name xmlns:s="urn:names-r-us">Jeff Smith</s:name>
+    #   <d:language>C#</d:language>
+    #   <d:rating>35</d:rating>
+    #  </d:student>
+    
+    assert_match /#{Regexp.quote(expected)}/, doc.to_xml
+  end
+  
+  def test_build_from_file
+    doc = Excemel::Document.new :file => "#{File.dirname(__FILE__)}/test_doc_1.xml"
+    expected = %[<color_swatch image="burgundy_cardigan.jpg">Burgundy</color_swatch>]
+    assert_match /#{Regexp.quote(expected)}/, doc.to_xml
+  end
+  
+  def test_build_from_url
+    doc = Excemel::Document.new :url => "http://news.bbc.co.uk/rss/newsonline_uk_edition/world/rss.xml"
+
+    headlines = doc.query '//title'
+    
+    assert_equal true, headlines.size > 0
   end
   
   private 
